@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>House Price Predictor</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f3; display: flex; justify-content: center; padding-top: 50px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
+        h2 { text-align: center; color: #333; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.9em; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; background: #007bff; color: white; border: none; padding: 12px; margin-top: 25px; border-radius: 6px; cursor: pointer; font-size: 1em; }
+        button:hover { background: #0056b3; }
+        .result-box { margin-top: 25px; padding: 15px; background: #d4edda; border-left: 5px solid #28a745; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Price Estimator</h2>
+        <form action="/predict" method="post">
+            <label>Overall Quality (1-10)</label>
+            <input type="number" name="OverallQual" min="1" max="10" value="5" required>
+
+            <label>Living Area (Sq Ft)</label>
+            <input type="number" name="GrLivArea" placeholder="e.g. 1500" required>
+
+            <label>Total Basement (Sq Ft)</label>
+            <input type="number" name="TotalBsmtSF" placeholder="e.g. 800" required>
+
+            <label>Garage Size (Cars)</label>
+            <input type="number" name="GarageCars" min="0" max="5" value="2" required>
+
+            <label>Neighborhood</label>
+            <select name="Neighborhood">
+                {% for n in neighborhoods %}
+                <option value="{{ n }}">{{ n }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Calculate Prediction</button>
+        </form>
+
+        {% if prediction_text %}
+        <div class="result-box">
+            <strong>Estimated Sale Price:</strong><br>
+            <span style="font-size: 1.5em;">{{ prediction_text }}</span>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
