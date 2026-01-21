@@ -1,0 +1,6 @@
+Name: Ogbe Amaju Alero
+Matric Number: 22CG031903
+Machine Learning Algorithm Used: Random Forest Regressor
+Model Persistence Method: Joblib
+Live link: https://house-prediction-system-amaju.onrender.com
+Github repo: https://github.com/maj-alero/House_Prediction_System 
