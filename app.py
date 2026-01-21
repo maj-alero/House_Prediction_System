@@ -1,15 +1,20 @@
 from flask import Flask, render_template, request
 import joblib
 import pandas as pd
+import os
 
 app = Flask(__name__)
 
-# 1. Load the saved trained model
-model = joblib.load('model/house_price_model.pkl')
+# Correct path: Ensure this matches your GitHub file structure
+MODEL_PATH = 'house_price_model.pkl'
+
+if os.path.exists(MODEL_PATH):
+    model = joblib.load(MODEL_PATH)
+else:
+    print(f"CRITICAL ERROR: {MODEL_PATH} not found!")
 
 @app.route('/')
 def index():
-    # List of neighborhoods for the dropdown (matches dataset categories)
     neighborhoods = sorted(['CollgCr', 'Veenker', 'Crawfor', 'NoRidge', 'Mitchel', 
                             'Somerst', 'NWAmes', 'OldTown', 'BrkSide', 'Sawyer', 
                             'NridgHt', 'NAmes', 'SawyerW', 'IDOTRR', 'MeadowV'])
@@ -17,25 +22,34 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if request.method == 'POST':
-        # 2. Capture user inputs from the form
-        data = {
-            'OverallQual': [int(request.form['OverallQual'])],
-            'GrLivArea': [float(request.form['GrLivArea'])],
-            'TotalBsmtSF': [float(request.form['TotalBsmtSF'])],
-            'GarageCars': [int(request.form['GarageCars'])],
-            'Neighborhood': [request.form['Neighborhood']]
-        }
-        
-        # 3. Pass input data to the model
-        query_df = pd.DataFrame(data)
-        prediction = model.predict(query_df)[0]
-        
-        # 4. Display result
-        formatted_price = f"${prediction:,.2f}"
-        return render_template('index.html', 
-                               prediction_text=formatted_price,
-                               neighborhoods=sorted(['CollgCr', 'Veenker', 'Crawfor', 'NoRidge']))
+    try:
+        if request.method == 'POST':
+            # Capture inputs
+            data = {
+                'OverallQual': [int(request.form.get('OverallQual', 5))],
+                'GrLivArea': [float(request.form.get('GrLivArea', 0))],
+                'TotalBsmtSF': [float(request.form.get('TotalBsmtSF', 0))],
+                'GarageCars': [int(request.form.get('GarageCars', 0))],
+                'Neighborhood': [request.form.get('Neighborhood', 'NAmes')]
+            }
+            
+            query_df = pd.DataFrame(data)
+            prediction = model.predict(query_df)[0]
+            
+            formatted_price = f"${prediction:,.2f}"
+            
+            # Re-list neighborhoods so the dropdown doesn't disappear on results page
+            neighborhoods = sorted(['CollgCr', 'Veenker', 'Crawfor', 'NoRidge', 'Mitchel', 
+                                    'Somerst', 'NWAmes', 'OldTown', 'BrkSide', 'Sawyer', 
+                                    'NridgHt', 'NAmes', 'SawyerW', 'IDOTRR', 'MeadowV'])
+            
+            return render_template('index.html', 
+                                   prediction_text=formatted_price,
+                                   neighborhoods=neighborhoods)
+    except Exception as e:
+        return f"Prediction Error: {str(e)}"
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    # Render requires binding to 0.0.0.0 and the PORT env variable
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
