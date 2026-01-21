@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 
 # Correct path: Ensure this matches your GitHub file structure
-MODEL_PATH = 'house_price_model.pkl'
+MODEL_PATH = 'model/house_price_model.pkl'
 
 if os.path.exists(MODEL_PATH):
     model = joblib.load(MODEL_PATH)
